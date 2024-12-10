@@ -74,7 +74,7 @@ const Container = styled.div`
   gap: 1rem;
   align-items: center;
   background-color: #131324;
-
+  
   .container {
     height: 85vh;
     width: 85vw;
