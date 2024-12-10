@@ -51,93 +51,122 @@ export default function ChatInput({ handleSendMsg }) {
 const Container = styled.div`
   display: grid;
   align-items: center;
-  grid-template-columns: 5% 95%;
+  grid-template-columns: 10% 90%;
   background-color: #080420;
-  padding: 0 2rem;
-  @media screen and (min-width: 720px) and (max-width: 1080px) {
-    padding: 0 1rem;
-    gap: 1rem;
+  padding: 0 1rem;
+
+  @media screen and (max-width: 720px) {
+    grid-template-columns: 15% 85%;
+    padding: 0.5rem;
   }
+
   .button-container {
     display: flex;
     align-items: center;
-    color: white;
-    gap: 1rem;
+    gap: 0.5rem;
+
     .emoji {
       position: relative;
+
       svg {
-        font-size: 1.5rem;
+        font-size: 1.2rem;
         color: #ffff00c8;
         cursor: pointer;
+
+        @media screen and (max-width: 720px) {
+          font-size: 1rem;
+        }
       }
+
       .emoji-picker-react {
         position: absolute;
         top: -350px;
+        right: 0;
         background-color: #080420;
         box-shadow: 0 5px 10px #9a86f3;
         border-color: #9a86f3;
+        z-index: 100;
+
+        @media screen and (max-width: 720px) {
+          top: -300px;
+          width: 90vw;
+        }
+
         .emoji-scroll-wrapper::-webkit-scrollbar {
           background-color: #080420;
           width: 5px;
+
           &-thumb {
             background-color: #9a86f3;
           }
         }
-        .emoji-categories {
-          button {
-            filter: contrast(0);
-          }
+
+        .emoji-categories button {
+          filter: contrast(0);
         }
+
         .emoji-search {
           background-color: transparent;
           border-color: #9a86f3;
         }
+
         .emoji-group:before {
           background-color: #080420;
         }
       }
     }
   }
+
   .input-container {
-    width: 100%;
-    border-radius: 2rem;
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 1rem;
+    width: 100%;
     background-color: #ffffff34;
+    border-radius: 2rem;
+
+    @media screen and (max-width: 720px) {
+      gap: 0.5rem;
+    }
+
     input {
-      width: 90%;
-      height: 60%;
+      flex: 1;
       background-color: transparent;
       color: white;
       border: none;
       padding-left: 1rem;
-      font-size: 1.2rem;
+      font-size: 1rem;
 
       &::selection {
         background-color: #9a86f3;
       }
+
       &:focus {
         outline: none;
       }
+
+      @media screen and (max-width: 720px) {
+        font-size: 0.9rem;
+        padding-left: 0.5rem;
+      }
     }
+
     button {
-      padding: 0.3rem 2rem;
+      padding: 0.3rem 1.5rem;
       border-radius: 2rem;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       background-color: #9a86f3;
       border: none;
-      @media screen and (min-width: 720px) and (max-width: 1080px) {
-        padding: 0.3rem 1rem;
-        svg {
-          font-size: 1rem;
-        }
-      }
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
       svg {
-        font-size: 2rem;
+        font-size: 1.5rem;
         color: white;
+
+        @media screen and (max-width: 720px) {
+          font-size: 1.2rem;
+        }
       }
     }
   }

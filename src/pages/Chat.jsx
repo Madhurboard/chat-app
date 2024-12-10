@@ -6,7 +6,6 @@ import styled from "styled-components";
 import { allUsersRoute, host } from "../utils/APIRoutes";
 import ChatContainer from "../components/ChatContainer";
 import Contacts from "../components/Contacts";
-import Welcome from "../components/Welcome";
 
 export default function Chat() {
   const navigate = useNavigate();
@@ -14,6 +13,8 @@ export default function Chat() {
   const [contacts, setContacts] = useState([]);
   const [currentChat, setCurrentChat] = useState(undefined);
   const [currentUser, setCurrentUser] = useState(undefined);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   useEffect(async () => {
     if (!localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
       navigate("/login");
@@ -25,6 +26,7 @@ export default function Chat() {
       );
     }
   }, []);
+
   useEffect(() => {
     if (currentUser) {
       socket.current = io(host);
@@ -42,22 +44,24 @@ export default function Chat() {
       }
     }
   }, [currentUser]);
+
   const handleChatChange = (chat) => {
     setCurrentChat(chat);
+    setIsMenuOpen(true);  // Hide contacts when a chat is selected
   };
+
   return (
-    <>
-      <Container>
-        <div className="container">
-          <Contacts contacts={contacts} changeChat={handleChatChange} />
-          {currentChat === undefined ? (
-            <Welcome />
-          ) : (
-            <ChatContainer currentChat={currentChat} socket={socket} />
-          )}
-        </div>
-      </Container>
-    </>
+    <Container>
+      <div className={`container ${isMenuOpen ? "menu-open" : ""}`}>
+        {/* When no chat is selected, make contacts take up full screen */}
+        {currentChat === undefined ? (
+            <Contacts contacts={contacts} changeChat={handleChatChange} />
+          
+        ) : (
+          <ChatContainer currentChat={currentChat} socket={socket} setIsMenuOpen={setIsMenuOpen} />
+        )}
+      </div>
+    </Container>
   );
 }
 
@@ -70,14 +74,26 @@ const Container = styled.div`
   gap: 1rem;
   align-items: center;
   background-color: #131324;
+
   .container {
     height: 85vh;
     width: 85vw;
     background-color: #00000076;
     display: grid;
     grid-template-columns: 25% 75%;
-    @media screen and (min-width: 720px) and (max-width: 1080px) {
-      grid-template-columns: 35% 65%;
+    transition: all 0.3s ease;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 100%;
+      height: 100%;
+      width: 100%;
+    }
+  }
+
+  .menu-open {
+    grid-template-columns: 100%;
+    @media (max-width: 768px) {
+      grid-template-columns: 100%;
     }
   }
 `;
