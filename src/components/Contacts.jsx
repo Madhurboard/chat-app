@@ -1,44 +1,33 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate hook
 import styled from "styled-components";
-import Logo from "../assets/logo.svg";
 
 export default function Contacts({ contacts, changeChat }) {
-  const [currentUserName, setCurrentUserName] = useState(undefined);
-  const [currentUserImage, setCurrentUserImage] = useState(undefined);
   const [currentSelected, setCurrentSelected] = useState(undefined);
-  useEffect(async () => {
-    const data = await JSON.parse(
-      localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-    );
-    setCurrentUserName(data.username);
-    setCurrentUserImage(data.avatarImage);
-  }, []);
+  const navigate = useNavigate(); // Initialize navigate function
+
   const changeCurrentChat = (index, contact) => {
     setCurrentSelected(index);
-    changeChat(contact);
+    // Navigate to the ChatContainer page and pass the selected contact as state
+    navigate("/chatcontainer", { state: { contact } });
   };
+
   return (
     <>
-      {currentUserImage && currentUserImage && (
+      {contacts && contacts.length > 0 && (
         <Container>
-          <div className="brand">
-            <img src={Logo} alt="logo" />
-            <h3>snappy</h3>
-          </div>
           <div className="contacts">
             {contacts.map((contact, index) => {
               return (
                 <div
                   key={contact._id}
-                  className={`contact ${
-                    index === currentSelected ? "selected" : ""
-                  }`}
+                  className={`contact ${index === currentSelected ? "selected" : ""}`}
                   onClick={() => changeCurrentChat(index, contact)}
                 >
                   <div className="avatar">
                     <img
                       src={`data:image/svg+xml;base64,${contact.avatarImage}`}
-                      alt=""
+                      alt="Contact Avatar"
                     />
                   </div>
                   <div className="username">
@@ -48,46 +37,28 @@ export default function Contacts({ contacts, changeChat }) {
               );
             })}
           </div>
-          <div className="current-user">
-            <div className="avatar">
-              <img
-                src={`data:image/svg+xml;base64,${currentUserImage}`}
-                alt="avatar"
-              />
-            </div>
-            <div className="username">
-              <h2>{currentUserName}</h2>
-            </div>
-          </div>
         </Container>
       )}
     </>
   );
 }
+
 const Container = styled.div`
-  display: grid;
-  grid-template-rows: 10% 75% 15%;
+  display: flex;
+  flex-direction: column;
+  background-color: #000;
+  height: 100%;
   overflow: hidden;
-  background-color: #080420;
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    justify-content: center;
-    img {
-      height: 2rem;
-    }
-    h3 {
-      color: white;
-      text-transform: uppercase;
-    }
-  }
+
   .contacts {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    overflow: auto;
-    gap: 0.8rem;
+    align-items: flex-start;
+    width: 100%;
+    padding: 0rem;
+    gap: 0;
+
+    overflow-y: auto;
     &::-webkit-scrollbar {
       width: 0.2rem;
       &-thumb {
@@ -96,56 +67,48 @@ const Container = styled.div`
         border-radius: 1rem;
       }
     }
+
     .contact {
-      background-color: #ffffff34;
-      min-height: 5rem;
-      cursor: pointer;
-      width: 90%;
-      border-radius: 0.2rem;
-      padding: 0.4rem;
       display: flex;
-      gap: 1rem;
       align-items: center;
-      transition: 0.5s ease-in-out;
+      width: 100%;
+      padding: 0.8rem 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease-in-out, transform 0.1s ease-in-out;
+      gap: 1rem;
+      position: relative;
+
+      &:hover {
+        background-color: #1e1e2e;
+      }
+
+      &:active {
+        transform: scale(0.98);
+      }
+
       .avatar {
         img {
           height: 3rem;
+          width: 3rem;
+          border-radius: 50%;
         }
       }
+
       .username {
         h3 {
           color: white;
-        }
-      }
-    }
-    .selected {
-      background-color: #9a86f3;
-    }
-  }
-
-  .current-user {
-    background-color: #0d0d30;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 2rem;
-    .avatar {
-      img {
-        height: 4rem;
-        max-inline-size: 100%;
-      }
-    }
-    .username {
-      h2 {
-        color: white;
-      }
-    }
-    @media screen and (min-width: 720px) and (max-width: 1080px) {
-      gap: 0.5rem;
-      .username {
-        h2 {
           font-size: 1rem;
+          margin: 0;
         }
+      }
+
+
+      &::before {
+        top: 0;
+      }
+
+      &::after {
+        bottom: 0;
       }
     }
   }

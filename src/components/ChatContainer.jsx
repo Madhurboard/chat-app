@@ -1,220 +1,214 @@
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
-import ChatInput from "./ChatInput";
-import Logout from "./Logout";
-import { v4 as uuidv4 } from "uuid";
+import { useLocation, useNavigate } from "react-router-dom";
+import { FiChevronLeft } from "react-icons/fi"; // Import left arrow icon from react-icons
 import axios from "axios";
-import { sendMessageRoute, recieveMessageRoute } from "../utils/APIRoutes";
+import { sendMessageRoute, recieveMessageRoute } from "../utils/APIRoutes"; // Import API routes
 
-export default function ChatContainer({ currentChat, socket }) {
+export default function ChatContainer() {
+  const { state } = useLocation(); // Access the state passed through navigate
+  const contact = state?.contact; // Get the contact object from the state
+  const navigate = useNavigate(); // Hook for navigation
+
   const [messages, setMessages] = useState([]);
-  const scrollRef = useRef();
-  
-  // Fetch messages when the component or currentChat changes
+  const [newMessage, setNewMessage] = useState("");
+  const scrollRef = useRef(null); // Reference for scrolling to the latest message
+  const socket = useRef(null); // Socket reference for real-time updates
+  const [currentChat, setCurrentChat] = useState(contact); // Current chat state
+
+  // Fetch messages when currentChat changes
   useEffect(() => {
     const fetchMessages = async () => {
-      const data = await JSON.parse(
-        localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-      );
-      const response = await axios.post(recieveMessageRoute, {
-        from: data._id,
-        to: currentChat._id,
-      });
-      setMessages(response.data);
+      if (currentChat) {
+        const data = await JSON.parse(localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY));
+        const response = await axios.post(recieveMessageRoute, {
+          from: data._id,
+          to: currentChat._id,
+        });
+        setMessages(response.data); // Assuming response.data contains the messages
+      }
     };
 
     if (currentChat) {
       fetchMessages();
     }
+    
+    // Set up an interval to refresh the messages every second
+    const interval = setInterval(() => {
+      if (currentChat) {
+        fetchMessages();
+      }
+    }, 1000);
+
+    // Clear the interval when the component unmounts or currentChat changes
+    return () => clearInterval(interval);
   }, [currentChat]);
 
-  // Handle sending message
+  // Handle sending a message
   const handleSendMsg = async (msg) => {
-    const data = await JSON.parse(
-      localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
-    );
-    socket.current.emit("send-msg", {
-      to: currentChat._id,
-      from: data._id,
-      msg,
-    });
-    await axios.post(sendMessageRoute, {
-      from: data._id,
-      to: currentChat._id,
-      message: msg,
-    });
+    const data = await JSON.parse(localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY));
+    if (socket?.current) {
+      socket.current.emit("send-msg", { to: currentChat._id, from: data._id, msg });
+    }
+    await axios.post(sendMessageRoute, { from: data._id, to: currentChat._id, message: msg });
 
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { fromSelf: true, message: msg },
-    ]);
+    setMessages((prevMessages) => [...prevMessages, { fromSelf: true, message: msg }]);
   };
 
-  // Listen for incoming messages in real-time via WebSocket
+  // Listen for incoming messages via socket
   useEffect(() => {
-    if (socket.current) {
+    if (socket?.current) {
       socket.current.on("msg-recieve", (msg) => {
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { fromSelf: false, message: msg },
-        ]);
+        setMessages((prevMessages) => [...prevMessages, { fromSelf: false, message: msg }]);
       });
     }
 
-    // Clean up listener on unmount
     return () => {
-      if (socket.current) {
+      if (socket?.current) {
         socket.current.off("msg-recieve");
       }
     };
   }, [socket]);
 
-  // Automatically scroll to the latest message
+  // Scroll to the bottom when new messages are added
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (scrollRef.current) {
+      scrollRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
+
+  // Handle the back button
+  const handleBack = () => {
+    navigate(-1); // Navigate back to the previous page
+  };
 
   return (
     <Container>
-      <div className="chat-header">
-        <div className="user-details">
-          <div className="avatar">
-            <img
-              src={`data:image/svg+xml;base64,${currentChat.avatarImage}`}
-              alt=""
-            />
-          </div>
-          <div className="username">
-            <h3>{currentChat.username}</h3>
-          </div>
-        </div>
-        <Logout />
-      </div>
-      <div className="chat-messages">
-        {messages.map((message) => (
-          <div ref={scrollRef} key={uuidv4()}>
-            <div
-              className={`message ${
-                message.fromSelf ? "sended" : "recieved"
-              }`}
-            >
-              <div className="content">
-                <p>{message.message}</p>
-              </div>
-            </div>
-          </div>
+      <Header>
+        <BackButton onClick={handleBack}>
+          <FiChevronLeft size={30} color="white" />
+        </BackButton>
+        <Avatar>
+          <img
+            src={`data:image/svg+xml;base64,${contact.avatarImage}`}
+            alt="User Avatar"
+            style={{ height: "40px", width: "40px", borderRadius: "50%" }}
+          />
+        </Avatar>
+        <Username>{contact.username}</Username>
+      </Header>
+
+      <MessageArea>
+        {messages.map((msg, index) => (
+          <Message key={index} isUser={msg.fromSelf}>
+            <MessageContent isUser={msg.fromSelf}>{msg.message}</MessageContent>
+          </Message>
         ))}
-      </div>
-      <ChatInput handleSendMsg={handleSendMsg} />
+        <div ref={scrollRef}></div> {/* This is where the scroll reference is placed */}
+      </MessageArea>
+
+      <InputArea>
+        <Input
+          type="text"
+          value={newMessage}
+          onChange={(e) => setNewMessage(e.target.value)}
+          placeholder="Type a message"
+        />
+        <SendButton onClick={() => handleSendMsg(newMessage)}>Send</SendButton>
+      </InputArea>
     </Container>
   );
 }
 
 const Container = styled.div`
-  display: grid;
-  grid-template-rows: 10% 80% 10%;
-  gap: 0.1rem;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: #1e1e1e;
+  padding: 1rem;
+`;
 
-  @media screen and (max-width: 720px) {
-    grid-template-rows: 15% 75% 10%;
-  }
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+  background-color: #333;
+  padding: 1rem;
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+`;
 
-  .chat-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 1rem;
+const BackButton = styled.button`
+  background-color: transparent;
+  color: white;
+  border: none;
+  margin-right: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
 
-    @media screen and (max-width: 720px) {
-      padding: 0 0.5rem;
-    }
-
-    .user-details {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-
-      .avatar {
-        img {
-          height: 2.5rem;
-          @media screen and (max-width: 720px) {
-            height: 2rem;
-          }
-        }
-      }
-
-      .username {
-        h3 {
-          color: white;
-          font-size: 1rem;
-          @media screen and (max-width: 720px) {
-            font-size: 0.9rem;
-          }
-        }
-      }
-    }
-  }
-
-  .chat-messages {
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    overflow: auto;
-
-    &::-webkit-scrollbar {
-      width: 0.2rem;
-      &-thumb {
-        background-color: #ffffff39;
-        width: 0.1rem;
-        border-radius: 1rem;
-      }
-    }
-
-    .message {
-      display: flex;
-      align-items: center;
-
-      .content {
-        max-width: 60%;
-        overflow-wrap: break-word;
-        padding: 0.8rem;
-        font-size: 1rem;
-        border-radius: 1rem;
-        color: #d1d1d1;
-
-        @media screen and (max-width: 720px) {
-          max-width: 80%;
-          padding: 0.6rem;
-          font-size: 0.9rem;
-        }
-      }
-    }
-
-    .sended {
-      justify-content: flex-end;
-
-      .content {
-        background-color: #4f04ff21;
-      }
-    }
-
-    .recieved {
-      justify-content: flex-start;
-
-      .content {
-        background-color: #9900ff20;
-      }
-    }
-  }
-
-  .chat-input {
-    padding: 0 1rem;
-
-    @media screen and (max-width: 720px) {
-      padding: 0 0.5rem;
-    }
+  &:hover {
+    color: #0078d4;
   }
 `;
 
+const Avatar = styled.div`
+  margin-right: 1rem;
+`;
+
+const Username = styled.h3`
+  color: white;
+  font-size: 1.2rem;
+  margin: 0;
+`;
+
+const MessageArea = styled.div`
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+`;
+
+const Message = styled.div`
+  display: flex;
+  justify-content: ${(props) => (props.isUser ? "flex-end" : "flex-start")};
+  margin: 0.5rem 0;
+`;
+
+const MessageContent = styled.div`
+  max-width: 60%;
+  padding: 0.8rem;
+  background-color: ${(props) => (props.isUser ? "#0078D4" : "#333")};
+  color: white;
+  border-radius: 1rem;
+`;
+
+const InputArea = styled.div`
+  display: flex;
+  gap: 0.5rem;
+`;
+
+const Input = styled.input`
+  flex: 1;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 1rem;
+  background-color: #333;
+  color: white;
+  font-size: 1rem;
+  outline: none;
+`;
+
+const SendButton = styled.button`
+  padding: 0.8rem 1rem;
+  border: none;
+  background-color: #0078d4;
+  color: white;
+  border-radius: 1rem;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #005a9e;
+  }
+`;

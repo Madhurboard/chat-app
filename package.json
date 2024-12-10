@@ -28,7 +28,6 @@
     "eject": "react-scripts eject",
     "start:port1": "cross-env PORT=3000 react-scripts start",
     "start:port2": "cross-env PORT=3001 react-scripts start"
-
   },
   "eslintConfig": {
     "extends": [
