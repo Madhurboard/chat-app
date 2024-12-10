@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate hook
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 export default function Contacts({ contacts, changeChat }) {
@@ -46,7 +46,7 @@ export default function Contacts({ contacts, changeChat }) {
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  background-color: #000;
+  background-color: #1e1e1e; /* Dark background */
   height: 100%;
   overflow: hidden;
 
@@ -77,9 +77,10 @@ const Container = styled.div`
       transition: background-color 0.3s ease-in-out, transform 0.1s ease-in-out;
       gap: 1rem;
       position: relative;
+      background-color: #ffffffff39; /* Darker contact card background */
 
       &:hover {
-        background-color: #1e1e2e;
+        background-color: #333333; /* Slightly lighter on hover */
       }
 
       &:active {
@@ -102,13 +103,13 @@ const Container = styled.div`
         }
       }
 
+      &.selected {
+        background-color: #0078d4; /* Blue highlight for selected contact */
+        color: white;
 
-      &::before {
-        top: 0;
-      }
-
-      &::after {
-        bottom: 0;
+        .username h3 {
+          font-weight: bold;
+        }
       }
     }
   }

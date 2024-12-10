@@ -4,6 +4,8 @@ import Homepage from "./pages/HomePage"; // Adjust the path if Homepage is locat
 import Login from "./pages/Login"; // Example: Login page
 import SetAvatar from "./components/SetAvatar"; // Example: SetAvatar page
 import ChatContainer from "./components/ChatContainer"; // Example: ChatContainer page
+import ProfilePage from "./components/ProfilePage"; // Import ProfilePage
+
 
 export default function App() {
   return (
@@ -16,9 +18,11 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/setAvatar" element={<SetAvatar />} />
         <Route path="/chatContainer" element={<ChatContainer />} />
+        <Route path="/profile" element={<ProfilePage />} />
 
         {/* Redirect Unmatched Routes to Homepage */}
         <Route path="*" element={<Navigate to="/" />} />
+
       </Routes>
     </Router>
   );

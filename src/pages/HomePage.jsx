@@ -5,7 +5,6 @@ import styled from "styled-components";
 import { allUsersRoute, host } from "../utils/APIRoutes";
 import { io } from "socket.io-client";
 import Contacts from "../components/Contacts";
-import Logo from "../assets/logo.svg"; // Replace with your actual logo path
 
 export default function Homepage() {
   const navigate = useNavigate();
@@ -47,16 +46,20 @@ export default function Homepage() {
     fetchContacts();
   }, [currentUser, navigate]);
 
+  // Navigate to profile page on avatar click
+  const handleAvatarClick = () => {
+    navigate("/profile", { state: { currentUser } });
+  };
+
   return (
     <Container>
       {/* Header Section */}
       <Header>
         <LogoSection>
-          <img src={Logo} alt="App Logo" />
           <h1>SNAPPY</h1>
         </LogoSection>
         {currentUser && (
-          <UserAvatar>
+          <UserAvatar onClick={handleAvatarClick}>
             <img
               src={`data:image/svg+xml;base64,${currentUser.avatarImage}`}
               alt="User Avatar"
@@ -66,29 +69,31 @@ export default function Homepage() {
       </Header>
 
       {/* Contacts Section */}
-      
+      <ContactsContainer>
         <Contacts contacts={contacts} />
-      
+      </ContactsContainer>
     </Container>
   );
 }
-
 const Container = styled.div`
-  height: 100vh;
-  width: 100vw;
   display: flex;
   flex-direction: column;
-  background-color: #131324;
+  height: 100vh;
+  background-color: #1e1e1e;
+  padding: 1rem;
 `;
 
 const Header = styled.div`
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  background-color: #1e1e2f;
-  padding: 15px 20px;
-  color: white;
-  border-bottom: 1px solid #444;
+  justify-content: space-between;
+  background-color: #333;
+  padding: 1rem;
+  border-radius: 1rem;
+  margin-bottom: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 `;
 
 const LogoSection = styled.div`
@@ -96,19 +101,11 @@ const LogoSection = styled.div`
   align-items: center;
   gap: 10px;
 
-  img {
-    height: 40px;
-    width: 40px;
-  }
-
   h1 {
     font-size: 1.5rem;
     color: #00c6ff;
-    margin: 2px 0 0 0;
-
-    @media (max-width: 768px) {
-      font-size: 1.2rem;
-    }
+    font-weight: 700;
+    letter-spacing: 1px;
   }
 `;
 
@@ -118,16 +115,17 @@ const UserAvatar = styled.div`
     width: 40px;
     border-radius: 50%;
     border: 2px solid #00c6ff;
+    transition: transform 0.2s ease-in-out;
+
+    &:hover {
+      transform: scale(1.05);
+      cursor: pointer;
+    }
   }
 `;
 
 const ContactsContainer = styled.div`
   flex: 1;
+  gap: 20px;
   overflow-y: auto;
-  background-color: #0e0e14;
-  padding: 10px;
-
-  @media (max-width: 768px) {
-    padding: 5px;
-  }
 `;
