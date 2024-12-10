@@ -238,3 +238,26 @@ const SendButton = styled.button`
     background-color: #005a9e;
   }
 `;
+
+const EmojiIcon = styled.button`
+  background-color: transparent;
+  color: white;
+  border: none;
+  border-radius: 1REM;
+  cursor: pointer;
+  padding: 0.8rem;
+
+  &:hover {
+    background-color: #444;
+  }
+`;
+
+const EmojiPickerWrapper = styled.div`
+  position: absolute;
+  bottom: 60px;
+  left: 0;
+  z-index: 2;
+  background-color: #333;
+  border-radius: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+`;
