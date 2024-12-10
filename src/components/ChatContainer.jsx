@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FiChevronLeft } from "react-icons/fi"; // Import left arrow icon from react-icons
+import { FiChevronLeft, FiSend, FiSmile } from "react-icons/fi"; // Import smile icon
 import axios from "axios";
 import { sendMessageRoute, recieveMessageRoute } from "../utils/APIRoutes"; // Import API routes
+import EmojiPicker from "emoji-picker-react"; // Import the emoji picker
 
 export default function ChatContainer() {
   const { state } = useLocation(); // Access the state passed through navigate
@@ -12,6 +13,7 @@ export default function ChatContainer() {
 
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const [emojiPickerVisible, setEmojiPickerVisible] = useState(false); // State to control emoji picker visibility
   const scrollRef = useRef(null); // Reference for scrolling to the latest message
   const socket = useRef(null); // Socket reference for real-time updates
   const [currentChat, setCurrentChat] = useState(contact); // Current chat state
@@ -53,6 +55,7 @@ export default function ChatContainer() {
     await axios.post(sendMessageRoute, { from: data._id, to: currentChat._id, message: msg });
 
     setMessages((prevMessages) => [...prevMessages, { fromSelf: true, message: msg }]);
+    setNewMessage(""); // Clear the textbox after sending the message
   };
 
   // Listen for incoming messages via socket
@@ -82,6 +85,11 @@ export default function ChatContainer() {
     navigate(-1); // Navigate back to the previous page
   };
 
+  // Function to handle emoji click
+  const handleEmojiClick = (event, emojiObject) => {
+    setNewMessage((prevMessage) => prevMessage + emojiObject.emoji); // Append emoji to message input
+  };
+
   return (
     <Container>
       <Header>
@@ -108,13 +116,25 @@ export default function ChatContainer() {
       </MessageArea>
 
       <InputArea>
+        <EmojiIcon onClick={() => setEmojiPickerVisible(!emojiPickerVisible)}>
+          <FiSmile size={20} color="white" />
+        </EmojiIcon>
+
         <Input
           type="text"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
           placeholder="Type a message"
         />
-        <SendButton onClick={() => handleSendMsg(newMessage)}>Send</SendButton>
+        <SendButton onClick={() => handleSendMsg(newMessage)}>
+          <FiSend size={20} color="white" />
+        </SendButton>
+        
+        {emojiPickerVisible && (
+          <EmojiPickerWrapper>
+            <EmojiPicker onEmojiClick={handleEmojiClick} />
+          </EmojiPickerWrapper>
+        )}
       </InputArea>
     </Container>
   );
@@ -168,6 +188,11 @@ const MessageArea = styled.div`
   flex: 1;
   overflow-y: auto;
   margin-bottom: 1rem;
+
+  /* Hide scrollbar */
+  ::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const Message = styled.div`
@@ -187,6 +212,7 @@ const MessageContent = styled.div`
 const InputArea = styled.div`
   display: flex;
   gap: 0.5rem;
+  position: relative;
 `;
 
 const Input = styled.input`
@@ -201,7 +227,7 @@ const Input = styled.input`
 `;
 
 const SendButton = styled.button`
-  padding: 0.8rem 1rem;
+  padding: 0.8rem;
   border: none;
   background-color: #0078d4;
   color: white;
@@ -211,4 +237,26 @@ const SendButton = styled.button`
   &:hover {
     background-color: #005a9e;
   }
+`;
+
+const EmojiIcon = styled.button`
+  background-color: transparent;
+  color: white;
+  border: none;
+  cursor: pointer;
+  padding: 0.8rem;
+
+  &:hover {
+    background-color: #444;
+  }
+`;
+
+const EmojiPickerWrapper = styled.div`
+  position: absolute;
+  bottom: 60px;
+  left: 0;
+  z-index: 2;
+  background-color: #333;
+  border-radius: 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 `;
