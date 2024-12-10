@@ -55,8 +55,9 @@ export default function Chat() {
       <div className={`container ${isMenuOpen ? "menu-open" : ""}`}>
         {/* When no chat is selected, make contacts take up full screen */}
         {currentChat === undefined ? (
+          <FullScreenContacts>
             <Contacts contacts={contacts} changeChat={handleChatChange} />
-          
+          </FullScreenContacts>
         ) : (
           <ChatContainer currentChat={currentChat} socket={socket} setIsMenuOpen={setIsMenuOpen} />
         )}
@@ -96,4 +97,13 @@ const Container = styled.div`
       grid-template-columns: 100%;
     }
   }
+`;
+
+const FullScreenContacts = styled.div`
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #131324; // Same background color as the container or adjust as needed
 `;
