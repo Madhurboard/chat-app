@@ -80,7 +80,8 @@ const Container = styled.div`
       background-color: #ffffffff39; /* Darker contact card background */
 
       &:hover {
-        background-color: #333333; /* Slightly lighter on hover */
+        background-color: #333333;
+        border-radius: 1rem;
       }
 
       &:active {

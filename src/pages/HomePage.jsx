@@ -128,4 +128,10 @@ const ContactsContainer = styled.div`
   flex: 1;
   gap: 20px;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background-color: transparent; /* Make background transparent */
+  border-radius: 1rem; /* Optional: add a border-radius for smooth corners */
+  box-shadow: inset 0px 4px 15px rgba(0, 0, 0, 0.1); /* Subtle inner shadow for depth */
+
 `;
