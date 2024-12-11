@@ -1,7 +1,9 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { FaPen, FaChevronLeft } from "react-icons/fa"; // Pencil and back icons from react-icons
+import axios from "axios";
+import { logoutRoute } from "../utils/APIRoutes"; // Import the logout route
+import { FaPen, FaChevronLeft, FaSignOutAlt } from "react-icons/fa"; // Added SignOut icon
 
 export default function ProfilePage() {
   const { state } = useLocation(); // Get the current user data from location state
@@ -10,6 +12,18 @@ export default function ProfilePage() {
 
   const handleBack = () => navigate(-1); // Go back to the previous page
 
+  
+  // Handle logout
+  const handleLogout = async () => {
+    const id = await JSON.parse(
+      localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)
+    )._id;
+    const data = await axios.get(`${logoutRoute}/${id}`);
+    if (data.status === 200) {
+      localStorage.clear();
+      navigate("/login");
+    }
+  };
   return (
     <Container>
       <Header>
@@ -47,6 +61,11 @@ export default function ProfilePage() {
             <h3>Settings</h3>
             <p>Manage your account preferences here.</p>
           </Section>
+
+          {/* Logout Button */}
+          <LogoutButton onClick={handleLogout}>
+            <FaSignOutAlt size={16} /> Logout
+          </LogoutButton>
         </ProfileDetails>
       ) : (
         <LoadingMessage>Loading...</LoadingMessage>
@@ -175,4 +194,26 @@ const LoadingMessage = styled.p`
   font-size: 1.2rem;
   color: #b0b0b0;
   text-align: center;
+`;
+
+const LogoutButton = styled.button`
+  margin-top: 2rem;
+  background-color: #ff3b3b;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #e60000;
+  }
+
+  svg {
+    margin-right: 0.5rem;
+  }
 `;

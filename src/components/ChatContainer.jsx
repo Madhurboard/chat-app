@@ -63,6 +63,7 @@ export default function ChatContainer() {
     if (socket?.current) {
       socket.current.on("msg-recieve", (msg) => {
         setMessages((prevMessages) => [...prevMessages, { fromSelf: false, message: msg }]);
+        showNotification(msg); // Trigger notification when a new message is received
       });
     }
 
@@ -88,6 +89,27 @@ export default function ChatContainer() {
   // Function to handle emoji click
   const handleEmojiClick = (event, emojiObject) => {
     setNewMessage((prevMessage) => prevMessage + emojiObject.emoji); // Append emoji to message input
+  };
+
+  // Request notification permission on mount
+  useEffect(() => {
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Show notification
+  const showNotification = (message) => {
+    if (Notification.permission === "granted") {
+      const notification = new Notification("New Message", {
+        body: message,
+        icon: "/path-to-your-icon.png", // Optional: set an icon for the notification
+      });
+
+      notification.onclick = () => {
+        navigate(`/chat/${currentChat._id}`); // Navigate to the chat page if the notification is clicked
+      };
+    }
   };
 
   return (
@@ -243,7 +265,7 @@ const EmojiIcon = styled.button`
   background-color: transparent;
   color: white;
   border: none;
-  border-radius: 1REM;
+  border-radius: 1rem;
   cursor: pointer;
   padding: 0.8rem;
 

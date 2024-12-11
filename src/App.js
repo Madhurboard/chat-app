@@ -4,7 +4,8 @@ import Homepage from "./pages/HomePage"; // Adjust the path if Homepage is locat
 import Login from "./pages/Login"; // Example: Login page
 import SetAvatar from "./components/SetAvatar"; // Example: SetAvatar page
 import ChatContainer from "./components/ChatContainer"; // Example: ChatContainer page
-import ProfilePage from "./components/ProfilePage"; // Import ProfilePage
+import ProfilePage from "./components/ProfilePage";
+import Register from "./pages/Register"; // Example: Register page
 
 
 export default function App() {
@@ -16,6 +17,7 @@ export default function App() {
 
         {/* Other Routes */}
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/setAvatar" element={<SetAvatar />} />
         <Route path="/chatContainer" element={<ChatContainer />} />
         <Route path="/profile" element={<ProfilePage />} />
